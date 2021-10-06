@@ -1,12 +1,26 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { api } from "../../services/api";
 import { Container } from "./styles";
 
+interface Transaction {
+  id: number;
+  title: string;
+  amount: number;
+  type: string;
+  category: string;
+  createAt: string;
+}
+
 export function TransactionTable() {
+  //Estado com o array de transações retornadas da API
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
   //Cria uma API Fake ao iniciar a aplicação através do Mirage.Js
   //Isso é configurado no index.tsx
   useEffect(() => {
-    api.get("transactions").then((response) => console.log(response.data));
+    api
+      .get("transactions")
+      .then((response) => setTransactions(response.data.transactions));
   }, []);
 
   return (
@@ -22,24 +36,30 @@ export function TransactionTable() {
         </thead>
 
         <tbody>
-          <tr>
-            <td>Salário</td>
-            <td className="deposit">R$4.500,00</td>
-            <td>Emprego</td>
-            <td>05/09/2021</td>
-          </tr>
-          <tr>
-            <td>Financiamento Casa</td>
-            <td className="withdraw">-R$2.264,00</td>
-            <td>Desenvolvimento</td>
-            <td>10/09/2021</td>
-          </tr>
-          <tr>
-            <td>Desenvolvimento de WebSite</td>
-            <td className="deposit">R$8.000,00</td>
-            <td>Desenvolvimento</td>
-            <td>25/09/2021</td>
-          </tr>
+          {/* O map percorre cada registro do vetir de transactions, e retorna o html da lista */}
+          {transactions.map((transaction) => {
+            return (
+              <tr key={transaction.id}>
+                <td>{transaction.title}</td>
+
+                <td className={transaction.type}>
+                  {/* O Intl é uma função nativa dos navegadores para formatar numeros */}
+                  {new Intl.NumberFormat("pt-Br", {
+                    style: "currency",
+                    currency: "BRL",
+                  }).format(transaction.amount)}
+                </td>
+                <td>{transaction.category}</td>
+
+                <td className={transaction.type}>
+                  {/* O Intl é uma função nativa dos navegadores para formatar numeros */}
+                  {new Intl.DateTimeFormat("pt-Br").format(
+                    new Date(transaction.createAt)
+                  )}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </Container>
