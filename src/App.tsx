@@ -3,6 +3,7 @@ import { Header } from "./components/Header";
 import { useState } from "react";
 import { GlobalStyle } from "./styles/global";
 import { NewTransactionModal } from "./components/NewTransactionModal";
+import { TransactionsProvider } from "./TransactionsContext";
 
 export function App() {
   //Estado para controlar a Modal
@@ -22,7 +23,8 @@ export function App() {
   }
 
   return (
-    <>
+    //Coloca o Contexto de Transações em volta de tudo, passando um vetor null
+    <TransactionsProvider>
       <Header onOpenNewTransactionModal={handleOpenNewTransactionaModal} />
       <Dashboard />
       <NewTransactionModal
@@ -30,6 +32,6 @@ export function App() {
         onRequestClose={handleCloseNewTransactionaModal}
       />
       <GlobalStyle />
-    </>
+    </TransactionsProvider>
   );
 }
