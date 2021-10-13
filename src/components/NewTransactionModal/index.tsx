@@ -1,10 +1,14 @@
+import { FormEvent, useState, useContext } from "react";
 import Modal from "react-modal";
+import { TransactionsContext } from "../../TransactionsContext";
+import { api } from "../../services/api";
+
+import { Container, TransactionTypeContainer, RadioBox } from "./styles";
+
 import incomeImg from "../../assets/income.svg";
 import outcomeImg from "../../assets/outcome.svg";
 import closeImg from "../../assets/close.svg";
-import { Container, TransactionTypeContainer, RadioBox } from "./styles";
-import { FormEvent, useState } from "react";
-import { api } from "../../services/api";
+import { type } from "os";
 
 Modal.setAppElement("#root");
 
@@ -17,27 +21,36 @@ export function NewTransactionModal({
   isOpen,
   onRequestClose,
 }: NewTransactionModalProps) {
+  //Contexto com os dados das transações
+  const { createTransaction } = useContext(TransactionsContext);
+
   //Estado para cada campo da template
   const [title, setTitle] = useState("");
-  const [value, setValue] = useState(0);
+  const [amount, setAmount] = useState(0);
   const [category, setCategory] = useState("");
 
   //Estado para armazenar o tipo de transacao clicado
   const [type, setType] = useState("deposit");
 
-  function handleCreateNewTransaction(event: FormEvent) {
+  async function handleCreateNewTransaction(event: FormEvent) {
     event.preventDefault(); //Desabilitar o refresh padrão do submit padrão do form (Não recarrega a pagina toda)
 
-    const data = {
+    const createAt = new Date().toString();
+
+    await createTransaction({
       title,
-      value,
+      amount,
       category,
       type,
-    };
+      createAt,
+    });
 
-    //Envia o form para a a API cadastrar
-    //A rota é configurada no index.tsx
-    api.post("/transactions", data);
+    //Resetar os campos e fechar o Modal
+    setTitle("");
+    setAmount(0);
+    setCategory("");
+    setType("deposit");
+    onRequestClose();
   }
 
   return (
@@ -67,8 +80,8 @@ export function NewTransactionModal({
         <input
           type="number"
           placeholder="Valor"
-          value={value}
-          onChange={(event) => setValue(Number(event.target.value))} //Sepre que mudar de valor atualiza o estado
+          value={amount}
+          onChange={(event) => setAmount(Number(event.target.value))} //Sepre que mudar de valor atualiza o estado
         />
 
         <TransactionTypeContainer>

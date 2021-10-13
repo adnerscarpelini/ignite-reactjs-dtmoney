@@ -11,13 +11,30 @@ interface Transaction {
   createAt: string;
 }
 
+//Tipagem para criar novas transações, herda tudo do Transaction apenas tirando o id e o createAt
+//type TransactionInput = Omit<Transaction, "id" | "createAt">;
+
+//Tipagem para criar novas transações, herda os campos que quero do Transaction apenas
+type TransactionInput = Pick<
+  Transaction,
+  "title" | "amount" | "type" | "category" | "createAt"
+>;
+
 //Permite o componente TransactionsProvider ter childrens. Exemplo <TransactionsProvider> bla bla bla </TransactionsProvider>
 interface TransactionProviderProps {
   children: ReactNode;
 }
 
+//Interface com os tipos de objeto que vai ter no contexto
+interface TransactionContextData {
+  transactions: Transaction[]; //Estado de transações
+  createTransaction: (Transaction: TransactionInput) => Promise<void>; //Função para criar novas transações (Retorna void)
+}
+
 //Inicia o contexto com o valor default, nesse caso um vetor vazio [] do tipo Transaction
-export const TransactionsContext = createContext<Transaction[]>([]);
+export const TransactionsContext = createContext<TransactionContextData>(
+  {} as TransactionContextData
+);
 
 //O provider é onde vai buscar os dados e carregar o estado para os valores do contexto.
 export function TransactionsProvider({ children }: TransactionProviderProps) {
@@ -32,9 +49,22 @@ export function TransactionsProvider({ children }: TransactionProviderProps) {
       .then((response) => setTransactions(response.data.transactions));
   }, []);
 
-  //Retorna o Provider com os valores do estado de transações
+  //Método para criar transações
+  async function createTransaction(transactionInput: TransactionInput) {
+    //Envia o form para a a API cadastrar
+    //A rota é configurada no index.tsx
+
+    const response = await api.post("/transactions", transactionInput);
+    //A API sempre retorna o objeto inserido. Mapear ele para adicionar no estado de transações.
+    const { transaction } = response.data;
+
+    //Os ... copia os valores atuais e adiciona o novo no final
+    setTransactions([...transactions, transaction]);
+  }
+
+  //Retorna o Provider com os valores do estado de transações e o método para criar novas transações
   return (
-    <TransactionsContext.Provider value={transactions}>
+    <TransactionsContext.Provider value={{ transactions, createTransaction }}>
       {children}
     </TransactionsContext.Provider>
   );
