@@ -1,14 +1,12 @@
-import { FormEvent, useState, useContext } from "react";
+import { FormEvent, useState } from "react";
+import { useTransactions } from "../../hooks/useTransactions";
 import Modal from "react-modal";
-import { TransactionsContext } from "../../TransactionsContext";
-import { api } from "../../services/api";
 
 import { Container, TransactionTypeContainer, RadioBox } from "./styles";
 
 import incomeImg from "../../assets/income.svg";
 import outcomeImg from "../../assets/outcome.svg";
 import closeImg from "../../assets/close.svg";
-import { type } from "os";
 
 Modal.setAppElement("#root");
 
@@ -22,7 +20,7 @@ export function NewTransactionModal({
   onRequestClose,
 }: NewTransactionModalProps) {
   //Contexto com os dados das transações
-  const { createTransaction } = useContext(TransactionsContext);
+  const { createTransaction } = useTransactions();
 
   //Estado para cada campo da template
   const [title, setTitle] = useState("");

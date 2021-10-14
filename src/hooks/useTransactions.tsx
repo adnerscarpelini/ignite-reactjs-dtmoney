@@ -1,5 +1,17 @@
-import { createContext, useEffect, useState, ReactNode } from "react";
-import { api } from "./services/api";
+import {
+  createContext,
+  useEffect,
+  useState,
+  ReactNode,
+  useContext,
+} from "react";
+import { api } from "../services/api";
+
+//************* Hook/Contexto de Transações *********************/
+//Esse arquivo é um contexto de transações, ou seja, ele gerencia as regras de negócio de transações
+//a partir de qualquer componente que o chama.
+//Ele é um hook próprio, sempre exportamos por padrão o hook useContext, dessa forma não precisa importar
+//o useContext em todos os componentes que vão chamar ele, aqui já faz isso.
 
 //Tipagem de Transações
 interface Transaction {
@@ -68,4 +80,13 @@ export function TransactionsProvider({ children }: TransactionProviderProps) {
       {children}
     </TransactionsContext.Provider>
   );
+}
+
+
+
+//Exporta o nosso hook personalizado já usando o useContext
+export function useTransactions() {
+  const context = useContext(TransactionsContext);
+
+  return context;
 }
